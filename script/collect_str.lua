@@ -143,7 +143,7 @@ while true do
   elseif choice == "5" then
     saveToFile()
   elseif choice == "6" then
-    print("Goodbye 👋")
+    print("\nProgram ended here.")
     break
   else
     print("Invalid choice.\n")
