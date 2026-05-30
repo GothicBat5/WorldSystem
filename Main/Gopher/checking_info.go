@@ -8,190 +8,417 @@ import (
 	"strings"
 )
 
-var roles = make(map[string][]string)
-
-//Utility 
 
 func trim(s string) string {
 	return strings.TrimSpace(s)
 }
 
 func capitalize(s string) string {
+
 	if s == "" {
 		return ""
 	}
-	return strings.ToUpper(string(s[0])) + strings.ToLower(s[1:])
+
+	runes := []rune(strings.ToLower(s))
+
+	first :=
+		[]rune(
+			strings.ToUpper(
+				string(runes[0]),
+			),
+		)
+
+	runes[0] = first[0]
+
+	return string(runes)
 }
 
-func input(prompt string, reader *bufio.Reader) string {
+func input(prompt string,
+	reader *bufio.Reader) string {
+
 	fmt.Print(prompt)
-	text, _ := reader.ReadString('\n')
+
+	text, _ :=
+		reader.ReadString('\n')
+
 	return trim(text)
 }
 
-//core
+// ---------- Core ----------
 
-func addPerson(reader *bufio.Reader) {
-	name := input("Enter name: ", reader)
+func addPerson(
+	reader *bufio.Reader,
+	roles map[string][]string,
+) {
+
+	name := input(
+		"Enter name: ",
+		reader,
+	)
 
 	if name == "" {
-		fmt.Println("Name cannot be empty.\n")
+
+		fmt.Println(
+			"Name cannot be empty.\n",
+		)
+
 		return
 	}
 
-	role := capitalize(input("Enter role: ", reader))
+	role := capitalize(
+		input(
+			"Enter role: ",
+			reader,
+		),
+	)
 
 	if role == "" {
-		fmt.Println("Role cannot be empty.\n")
+
+		fmt.Println(
+			"Role cannot be empty.\n",
+		)
+
 		return
 	}
 
-	roles[role] = append(roles[role], name)
+	// Duplicate prevention
 
-	fmt.Printf("Added %s as %s\n\n", name, role)
+	for _, person :=
+		range roles[role] {
+
+		if strings.EqualFold(
+			person,
+			name,
+		) {
+
+			fmt.Println(
+				"Person already exists in this role.\n",
+			)
+
+			return
+		}
+	}
+
+	roles[role] =
+		append(
+			roles[role],
+			name,
+		)
+
+	fmt.Printf(
+		"Added %s as %s\n\n",
+		name,
+		role,
+	)
 }
 
-func showGroups() {
-	fmt.Println("\n------ People Groups ------")
+func showGroups(
+	roles map[string][]string,
+) {
+
+	fmt.Println(
+		"\n------ People Groups ------",
+	)
 
 	if len(roles) == 0 {
-		fmt.Println("No group found.\n")
+
+		fmt.Println(
+			"No group found.\n",
+		)
+
 		return
 	}
 
 	var sortedRoles []string
-	for role := range roles {
-		sortedRoles = append(sortedRoles, role)
-	}
-	sort.Strings(sortedRoles)
 
-	for _, role := range sortedRoles {
-		people := roles[role]
-		sort.Strings(people)
-		fmt.Printf("%ss: %s\n", role, strings.Join(people, ", "))
+	for role := range roles {
+
+		sortedRoles =
+			append(
+				sortedRoles,
+				role,
+			)
+	}
+
+	sort.Strings(
+		sortedRoles,
+	)
+
+	for _, role :=
+		range sortedRoles {
+
+		people :=
+			append(
+				[]string(nil),
+				roles[role]...,
+			)
+
+		sort.Strings(
+			people,
+		)
+
+		fmt.Printf(
+			"%ss: %s\n",
+			role,
+			strings.Join(
+				people,
+				", ",
+			),
+		)
 	}
 
 	fmt.Println()
 }
 
-func deletePerson(reader *bufio.Reader) {
-	name := input("Enter name to delete: ", reader)
+func deletePerson(
+	reader *bufio.Reader,
+	roles map[string][]string,
+) {
 
-	for role, people := range roles {
-		for i, p := range people {
-			if strings.EqualFold(p, name) {
-				roles[role] = append(people[:i], people[i+1:]...)
-				fmt.Printf("Removed %s from %s\n\n", p, role)
+	name :=
+		input(
+			"Enter name to delete: ",
+			reader,
+		)
+
+	for role, people :=
+		range roles {
+
+		for i, p :=
+			range people {
+
+			if strings.EqualFold(
+				p,
+				name,
+			) {
+
+				roles[role] =
+					append(
+						people[:i],
+						people[i+1:]...,
+					)
+
+				fmt.Printf(
+					"Removed %s from %s\n\n",
+					p,
+					role,
+				)
+
 				return
 			}
 		}
 	}
 
-	fmt.Println("Person not found.\n")
+	fmt.Println(
+		"Person not found.\n",
+	)
 }
 
-func searchPerson(reader *bufio.Reader) {
-	name := input("Search name: ", reader)
+func searchPerson(
+	reader *bufio.Reader,
+	roles map[string][]string,
+) {
+
+	name :=
+		input(
+			"Search name: ",
+			reader,
+		)
+
+	target :=
+		strings.ToLower(
+			name,
+		)
+
 	found := false
 
-	for role, people := range roles {
-		for _, person := range people {
-			if strings.Contains(strings.ToLower(person), strings.ToLower(name)) {
-				fmt.Printf("%s is a %s\n", person, role)
+	for role, people :=
+		range roles {
+
+		for _, person :=
+			range people {
+
+			if strings.Contains(
+				strings.ToLower(
+					person,
+				),
+				target,
+			) {
+
+				fmt.Printf(
+					"%s is a %s\n",
+					person,
+					role,
+				)
+
 				found = true
 			}
 		}
 	}
 
 	if !found {
-		fmt.Println("No person found.\n")
+
+		fmt.Println(
+			"No person found.\n",
+		)
+
 	} else {
+
 		fmt.Println()
 	}
 }
 
-//file handling
+// ---------- File ----------
 
-func saveToFile() {
-	file, err := os.Create("roles.txt")
+func saveToFile(
+	roles map[string][]string,
+) {
+
+	file, err :=
+		os.Create(
+			"roles.txt",
+		)
+
 	if err != nil {
-		fmt.Println("Error saving file.\n")
+
+		fmt.Println(
+			"Error saving file.\n",
+		)
+
 		return
 	}
+
 	defer file.Close()
 
-	writer := bufio.NewWriter(file)
+	writer :=
+		bufio.NewWriter(
+			file,
+		)
 
-	for role, people := range roles {
-		for _, person := range people {
-			fmt.Fprintf(writer, "%s|%s\n", role, person)
+	for role, people :=
+		range roles {
+
+		for _, person :=
+			range people {
+
+			fmt.Fprintf(
+				writer,
+				"%s|%s\n",
+				role,
+				person,
+			)
 		}
 	}
 
 	writer.Flush()
-	fmt.Println("Data saved!\n")
+
+	fmt.Println(
+		"Data saved!\n",
+	)
 }
 
-func loadFromFile() {
-	file, err := os.Open("roles.txt")
+func loadFromFile(roles map[string][]string) {
+
+	file, err := os.Open("roles.txt",)
+
 	if err != nil {
-		return //file doesn't exist = ignore
+
+		return
 	}
+
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	scanner :=
+		bufio.NewScanner(file, )
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "|")
 
-		if len(parts) == 2 {
-			role := parts[0]
-			name := parts[1]
+		line :=	scanner.Text()
 
-			roles[role] = append(roles[role], name)
+		parts := strings.Split(line, "|",)
+
+		if len(parts) != 2 {
+
+			continue
 		}
+
+		role :=	parts[0]
+
+		name := parts[1]
+
+		roles[role] = append(roles[role], name, )
 	}
 }
 
 
 func showMenu() {
-	fmt.Println("===== MENU =====")
-	fmt.Println("1. Add Person")
-	fmt.Println("2. Show Groups")
-	fmt.Println("3. Delete Person")
-	fmt.Println("4. Search Person")
-	fmt.Println("5. Save")
-	fmt.Println("6. Quit")
+
+	fmt.Println("===== MENU =====",)
+
+	fmt.Println("1. Add Person",)
+
+	fmt.Println("2. Show Groups",)
+
+	fmt.Println("3. Delete Person",)
+
+	fmt.Println("4. Search Person",)
+
+	fmt.Println("5. Save",)
+
+	fmt.Println("6. Quit",)
 }
 
-//m loop
-
 func main() {
-	reader := bufio.NewReader(os.Stdin)
 
-	loadFromFile()
+	reader :=
+		bufio.NewReader(os.Stdin, )
+
+	roles :=
+		make(map[string][]string,)
+
+	loadFromFile(roles, )
 
 	for {
+
 		showMenu()
-		choice := input("Choose: ", reader)
+
+		choice :=
+			input("Choose: ", reader,)
 
 		switch choice {
+
 		case "1":
-			addPerson(reader)
+
+			addPerson(reader, roles, )
+
 		case "2":
-			showGroups()
+
+			showGroups(roles, )
+
 		case "3":
-			deletePerson(reader)
+
+			deletePerson(
+				reader,
+				roles,
+			)
+
 		case "4":
-			searchPerson(reader)
+
+			searchPerson(reader, roles,)
+
 		case "5":
-			saveToFile()
+
+			saveToFile(roles, )
+
 		case "6":
-			fmt.Println("\nProgram ended here.")
+
+			fmt.Println("\nProgram ended here.",)
+
 			return
+
 		default:
-			fmt.Println("Invalid choice.\n")
+
+			fmt.Println("Invalid choice.\n",)
 		}
 	}
 }
