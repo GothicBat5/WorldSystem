@@ -8,15 +8,13 @@ import (
 	"strings"
 )
 
+const ROOM_COUNT = 5
+
 type Room struct {
 	Customer string
+	Occupied bool
 }
 
-func (r Room) isVacant() bool {
-	return r.Customer == "" || r.Customer == "Vacant"
-}
-
-//Utility 
 
 func input(prompt string, reader *bufio.Reader) string {
 	fmt.Print(prompt)
@@ -25,92 +23,164 @@ func input(prompt string, reader *bufio.Reader) string {
 }
 
 func getValidatedInt(prompt string, reader *bufio.Reader) int {
-	for {
-		text := input(prompt, reader)
-		val, err := strconv.Atoi(text)
 
-		if err != nil || val <= 0 {
-			fmt.Println("\nInvalid input. Try again.")
+	for {
+
+		text := input(prompt, reader)
+
+		value, err := strconv.Atoi(text)
+
+		if err != nil || value <= 0 {
+
+			fmt.Println("Invalid input.")
 			continue
 		}
-		return val
+
+		return value
 	}
 }
 
-//login
+func getValidatedFloat(prompt string, reader *bufio.Reader) float64 {
 
-func logIn(reader *bufio.Reader) bool {
-	users := map[string]string{
-		"Emma":    "5655",
-		"Justine": "8902",
-		"Claude":  "1236",
-		"Miller":  "3279",
-		"Laura":   "4350",
+	for {
+
+		text := input(prompt, reader)
+
+		value, err := strconv.ParseFloat(text, 64)
+
+		if err != nil || value <= 0 {
+
+			fmt.Println("Invalid input.")
+			continue
+		}
+
+		return value
+	}
+}
+
+
+func (r Room) isVacant() bool {
+	return !r.Occupied
+}
+
+
+func logIn(reader *bufio.Reader, users map[string]string) bool {
+
+	const MAX_ATTEMPTS = 3
+
+	for attempt := 1; attempt <= MAX_ATTEMPTS; attempt++ {
+
+		fmt.Printf("\nLOG IN (%d/%d)\n", attempt, MAX_ATTEMPTS)
+
+		username := input("Enter username: ", reader)
+		password := input("Pin pass: ", reader)
+
+		if pass, ok := users[username]; ok && pass == password {
+
+			fmt.Printf("Welcome %s!\n", username)
+			return true
+		}
+
+		fmt.Println("Invalid credentials.")
 	}
 
-	fmt.Println("LOG IN")
-
-	username := input("Enter username: ", reader)
-	password := input("Pin pass: ", reader)
-
-	if pass, ok := users[username]; ok && pass == password {
-		fmt.Printf("Welcome %s!\n", username)
-		return true
-	}
-
-	fmt.Println("Invalid Input.\nMake sure it was correct.")
+	fmt.Println("\nToo many failed attempts.")
 	return false
 }
 
-//Reservation 
 
 func handleReservation(rooms []Room, reader *bufio.Reader) {
+
 	roomNum := getValidatedInt("Enter room number: ", reader)
 
 	if roomNum < 1 || roomNum > len(rooms) {
-		fmt.Println("\nInvalid room number.")
+
+		fmt.Println("Invalid room number.")
 		return
 	}
 
 	selected := &rooms[roomNum-1]
 
 	if !selected.isVacant() {
-		fmt.Printf("Room is already occupied by %s\n", selected.Customer)
+
+		fmt.Printf("Room already occupied by %s\n", selected.Customer,)
+
 		return
 	}
 
-	name := input("Enter name: ", reader)
-	selected.Customer = name
+	name := input("Enter customer name: ", reader)
 
-	hrs := getValidatedInt("Enter number of hours: ", reader)
-	rate := getValidatedInt("Enter rate per hour: ", reader)
+	if name == "" {
 
-	total := hrs * rate
-	fmt.Printf("Total Cost: P%d\n", total)
+		fmt.Println("Name required.")
+		return
+	}
 
-	payment := getValidatedInt("Enter payment: ", reader)
+	hours := getValidatedInt("Enter hours: ", reader)
+	rate := getValidatedFloat("Rate per hour: ", reader)
+
+	total := float64(hours) * rate
+
+	fmt.Printf("Total Cost: P%.2f\n", total)
+
+	payment := getValidatedFloat("Payment: ", reader)
 
 	if payment < total {
-		fmt.Println("\nInsufficient payment.")
-		selected.Customer = "Vacant"
+
+		fmt.Println("Insufficient payment.")
 		return
 	}
 
-	fmt.Printf("Change: P%d\n", payment-total)
+	selected.Customer = name
+	selected.Occupied = true
+
+	fmt.Printf("Change: P%.2f\n", payment-total)
 	fmt.Println("Reservation Successful.")
 }
 
-// showw
+
+func checkOut(rooms []Room, reader *bufio.Reader) {
+
+	roomNum := getValidatedInt("Checkout room number: ", reader)
+
+	if roomNum < 1 || roomNum > len(rooms) {
+
+		fmt.Println("Invalid room.")
+		return
+	}
+
+	selected := &rooms[roomNum-1]
+
+	if selected.isVacant() {
+
+		fmt.Println("Room already vacant.")
+		return
+	}
+
+	fmt.Printf(
+		"%s checked out from room %d\n",
+		selected.Customer,
+		roomNum,
+	)
+
+	selected.Customer = ""
+	selected.Occupied = false
+}
+
 
 func showRooms(rooms []Room) {
-	fmt.Println("\nRoom Status:")
 
-	for i, r := range rooms {
-		name := r.Customer
-		if name == "" {
-			name = "Vacant"
+	fmt.Println("\n===== ROOM STATUS =====")
+
+	for i, room := range rooms {
+
+		status := "Vacant"
+
+		if room.Occupied {
+			status = room.Customer
 		}
-		fmt.Printf("Room %d: %s\n", i+1, name)
+
+		fmt.Printf("Room %d : %s\n", i+1, status,)
 	}
 
 	fmt.Println()
@@ -118,36 +188,47 @@ func showRooms(rooms []Room) {
 
 
 func main() {
+
 	reader := bufio.NewReader(os.Stdin)
 
-	//rooms
-	rooms := make([]Room, 5)
-	for i := range rooms {
-		rooms[i].Customer = "Vacant"
+	users := map[string]string{
+		"Emma": "5655",
+		"Justine": "8902",
+		"Claude": "1236",
+		"Miller": "3279",
+		"Laura": "4350",
+	}
+
+	rooms := make([]Room, ROOM_COUNT)
+
+	if !logIn(reader, users) {
+		return
 	}
 
 	for {
-		if !logIn(reader) {
-			continue
-		}
 
-		for {
-			showRooms(rooms)
+		showRooms(rooms)
 
-			fmt.Println("[1] Check In")
-			fmt.Println("[2] Exit")
+		fmt.Println("[1] Check In")
+		fmt.Println("[2] Check Out")
+		fmt.Println("[3] Exit")
 
-			choice := input("Choice: ", reader)
+		choice := input("Choice: ", reader)
 
-			switch choice {
-			case "1":
-				handleReservation(rooms, reader)
-			case "2":
-				fmt.Println("\nGoodbye. Program Ended.")
-				return
-			default:
-				fmt.Println("\nInvalid Choice.")
-			}
+		switch choice {
+
+		case "1":
+			handleReservation(rooms, reader)
+
+		case "2":
+			checkOut(rooms, reader)
+
+		case "3":
+			fmt.Println("\nProgram Ended.")
+			return
+
+		default:
+			fmt.Println("Invalid choice.")
 		}
 	}
 }
