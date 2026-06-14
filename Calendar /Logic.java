@@ -33,9 +33,7 @@ public class Logic
 
     public int getStartColumn()
     {
-        DayOfWeek day =
-                currentMonth.atDay(1).getDayOfWeek();
-
+        DayOfWeek day = currentMonth.atDay(1).getDayOfWeek();
         return day.getValue() % 7;
     }
 
