@@ -8,4 +8,4 @@ I would liked to experiment on Go programming language
 just liked other people experiment on the Rust
 Go really fits when it comes for simulation 
 
-= go.dev
+= [Go - Lang](go.dev)
