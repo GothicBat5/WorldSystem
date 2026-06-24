@@ -12,7 +12,7 @@ import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
-public class Build implements HTML.PageLoadListener  
+public class Build implements HTML.PageLoadListener 
 {
     private JFrame frame;
     private JTextField urlField;
@@ -26,7 +26,8 @@ public class Build implements HTML.PageLoadListener
     private static final Color ACCENT_COLOR = new Color(66, 133, 244);
     private static final Font UI_FONT = new Font("SansSerif", Font.PLAIN, 14);
 
-    public Build() {
+    public Build() 
+    {
         htmlView = new HTML();
         htmlView.setPageLoadListener(this);
         pageLoader = new PageLoader(htmlView);
@@ -40,7 +41,8 @@ public class Build implements HTML.PageLoadListener
 
         urlField = new JTextField();
         urlField.setFont(UI_FONT);
-        urlField.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(210, 210, 210)),
+        urlField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210, 210, 210)),
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
 
@@ -83,9 +85,10 @@ public class Build implements HTML.PageLoadListener
         frame.setVisible(true);
     }
 
-    private void onGoClicked(ActionEvent e) {
-        
+    private void onGoClicked(ActionEvent e) 
+    {
         String url = urlField.getText().trim();
+        
         if (!url.isEmpty()) 
         {
             pageLoader.load(url);
@@ -114,5 +117,11 @@ public class Build implements HTML.PageLoadListener
             statusLabel.setForeground(new Color(190, 60, 60));
             statusLabel.setText("Failed: " + message);
         }
+    }
+
+    @Override
+    public void onTitleChanged(String title) 
+    {
+        frame.setTitle(title + " - Mini Java Browser");
     }
 }
