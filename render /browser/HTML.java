@@ -1,5 +1,6 @@
-import javax.swing.JEditorPane; // The html loader reader ?? 
+import javax.swing.JEditorPane;
 import javax.swing.SwingWorker;
+import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import java.net.URL;
 
@@ -9,6 +10,7 @@ public class HTML
     {
         void onLoadStart(String url);
         void onLoadFinish(boolean success, String message);
+        void onTitleChanged(String title);
     }
 
     private JEditorPane editorPane;
@@ -34,28 +36,41 @@ public class HTML
 
     public void loadPage(String url) 
     {
-        String fixedUrl = url;
-        if (!fixedUrl.startsWith("http://") && !fixedUrl.startsWith("https://")) 
+        URL parsedUrl;
+        
+        try {
+            parsedUrl = new URL(url);
+        } 
+        catch (Exception e) 
         {
-            fixedUrl = "https://" + fixedUrl;
+            
+            if (listener != null) 
+            {
+                listener.onLoadStart(url);
+                listener.onLoadFinish(false, "Invalid URL: " + url);
+            }
+            editorPane.setContentType("text/html");
+            editorPane.setText("<html><body><h2>Invalid URL</h2><p>" +url+ "</p></body></html>");
+            return;
         }
-        final String finalUrl = fixedUrl;
 
         if (listener != null) 
         {
-            listener.onLoadStart(finalUrl);
+            listener.onLoadStart(url);
         }
 
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() 
+        {
             private Exception error;
 
             @Override
             protected Void doInBackground() 
             {
                 try {
-                    editorPane.setPage(new URL(finalUrl));
+                    editorPane.setPage(parsedUrl);
                 } 
-                catch (Exception e) {
+                catch (Exception e) 
+                {
                     error = e;
                 }
                 return null;
@@ -66,13 +81,22 @@ public class HTML
             {
                 if (error != null) 
                 {
-                    
                     editorPane.setContentType("text/html");
-                    editorPane.setText("<html><body><h2>Failed to load page</h2><p>" + error.getMessage()+"</p></body></html>");
+                    editorPane.setText("<html><body><h2>Failed to load page</h2><p>" + error.getMessage() + "</p></body></html>");
+                    
+                    if (listener != null) 
+                    {
+                        listener.onLoadFinish(false, error.getMessage());
+                    }
+                    return;
                 }
+
+                Object titleProperty = editorPane.getDocument().getProperty(Document.TitleProperty);
+                String title = titleProperty != null ? titleProperty.toString().trim() : "";
                 if (listener != null) 
                 {
-                    listener.onLoadFinish(error == null, error == null ? finalUrl : error.getMessage());
+                    listener.onTitleChanged(title.isEmpty() ? url : title);
+                    listener.onLoadFinish(true, url);
                 }
             }
         };
