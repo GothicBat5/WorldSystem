@@ -1,0 +1,61 @@
+In research psychology, the most common terms revolve around study design, 
+
+data analysis, and theory building 
+
+words like hypothesis, variables, reliability, validity, control group, ANOVA, correlation, 
+
+and ethics are part of everyday vocabulary. 
+
+These terms distinguish research psychologists from clinicians, 
+
+since their focus is on producing knowledge rather than giving advice.
+
+📖 Core Research Psychology Terminology
+Foundational Concepts
+Hypothesis – A testable prediction about relationships between variables.
+
+Independent Variable (IV) – The factor manipulated in an experiment.
+
+Dependent Variable (DV) – The outcome measured.
+
+Control Group – Participants not exposed to the experimental treatment.
+
+Reliability – Consistency of measurement.
+
+Validity – Accuracy of measurement (does it measure what it claims?).
+
+Research Design & Methods
+
+Between-subjects design – Different groups experience different conditions.
+
+Within-subjects design – Same participants experience all conditions.
+
+Random Assignment – Participants randomly placed into groups to reduce bias.
+
+Longitudinal Study – Observes the same individuals over time.
+
+Cross-sectional Study – Compares different groups at one point in time.
+
+Qualitative Methods – Interviews, case studies, thematic analysis.
+
+Quantitative Methods – Statistical tests, surveys, experiments.
+
+Data & Analysis
+Correlation – Relationship between two variables (positive, negative, none).
+
+ANOVA (Analysis of Variance) – Compares means across multiple groups.
+
+p-value – Probability that results occurred by chance.
+
+Effect Size – Strength of a relationship or difference.
+
+Regression Analysis – Predicting outcomes based on variables.
+
+Ethics & Communication
+Informed Consent – Participants must agree with full knowledge of risks.
+
+APA Style – Standard writing format for psychology papers.
+
+Belmont Report – Ethical principles guiding human research.
+
+Peer Review – Evaluation of research by other experts before publication.
